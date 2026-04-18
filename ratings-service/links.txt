@@ -1,0 +1,140 @@
+# Project Links
+
+## Repository
+- GitHub:
+
+## Documentation
+- Spring Boot Docs: https://docs.spring.io/spring-boot/docs/current/reference/html/
+- Spring Data JPA: https://docs.spring.io/spring-data/jpa/docs/current/reference/html/
+- Spring Web MVC: https://docs.spring.io/spring-framework/docs/current/reference/html/web.html
+
+## API Endpoints
+Base URL: http://localhost:8082
+
+---
+
+### 1. GET /ratings/{name}
+Fetch the rating for a movie by its name.
+
+- Method:  GET
+- URL:     http://localhost:8082/ratings/{name}
+- Params:  {name} - movie name (path variable)
+
+#### Example Request (curl):
+  curl -X GET http://localhost:8082/ratings/Inception
+
+#### Example Request (HTTPie):
+  http GET http://localhost:8082/ratings/Inception
+
+#### Success Response (200 OK):
+  {
+    "id": 1,
+    "name": "Inception",
+    "avgRating": 8.5,
+    "count": 10
+  }
+
+#### Error Response - Movie Not Found (500 Internal Server Error):
+  {
+    "timestamp": "2026-03-21T09:51:41.367423",
+    "status": 500,
+    "error": "Internal Server Error",
+    "message": "Movie not found with name Inception",
+    "path": "/ratings/Inception"
+  }
+
+---
+
+### 2. POST /ratings
+Add a new rating or update the running average for an existing movie.
+- If the movie does NOT exist → creates a new entry with avgRating = stars, count = 1.
+- If the movie EXISTS       → recalculates running average and increments count.
+
+- Method:       POST
+- URL:          http://localhost:8082/ratings
+- Content-Type: application/json
+
+#### Request Body:
+  {
+    "name": "Inception",
+    "stars": 9.0
+  }
+
+#### Example Request (curl):
+  curl -X POST http://localhost:8082/ratings \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Inception", "stars": 9.0}'
+
+#### Example Request (HTTPie):
+  http POST http://localhost:8082/ratings name="Inception" stars:=9.0
+
+#### Success Response (200 OK) - First rating submitted:
+  {
+    "id": 1,
+    "name": "Inception",
+    "avgRating": 9.0,
+    "count": 1
+  }
+
+#### Success Response (200 OK) - Subsequent rating submitted:
+  (previous avgRating=8.5, count=10; new star=9.0)
+  {
+    "id": 1,
+    "name": "Inception",
+    "avgRating": 8.545454545454545,
+    "count": 11
+  }
+
+---
+
+### Average Rating Formula
+  newAverage = (currentAvgRating * currentCount + newStars) / (currentCount + 1)
+
+---
+
+### Error Response Structure (GlobalExceptionHandler)
+All errors follow this structure:
+  {
+    "timestamp": "<ISO DateTime>",
+    "status": <HTTP status code>,
+    "error": "<error type>",
+    "message": "<details>",
+    "path": "<request path>"
+  }
+
+---
+
+## Database
+- H2 Console:   http://localhost:8082/h2-console
+- JDBC URL:     jdbc:h2:file:./data/ratingsdb
+- Username:     user
+- Password:     password
+- Driver:       org.h2.Driver
+
+NOTE: Data is persisted to ./data/ratingsdb.mv.db (file-based H2).
+      Data survives server restarts as long as ddl-auto=update in application.yaml.
+
+## SQL Commands
+
+-- View all ratings
+SELECT * FROM RATING;
+
+-- View a specific movie rating
+SELECT * FROM RATING WHERE NAME = 'Inception';
+
+-- Insert a new rating manually
+INSERT INTO RATING (ID, NAME, AVG_RATING, COUNT) VALUES (1, 'Inception', 8.5, 10);
+
+-- Update a rating manually
+UPDATE RATING SET AVG_RATING = 9.0, COUNT = 20 WHERE NAME = 'Inception';
+
+-- Delete a rating
+DELETE FROM RATING WHERE NAME = 'Inception';
+
+-- Drop the table
+DROP TABLE IF EXISTS RATING;
+
+## Tools & Libraries
+- Lombok:    https://projectlombok.org/
+- H2 Console: http://localhost:8082/h2-console
+- Actuator:   http://localhost:8082/actuator

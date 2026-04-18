@@ -1,0 +1,8 @@
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/RatingsServiceApplication.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/controller/GlobalExceptionHandler.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/controller/RatingController.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/exception/NotFoundException.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/model/Rating.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/model/RatingRequest.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/repo/RatingRepository.java
+/Users/eswarsuryateja.gollu/Documents/Backend/ratings-service/src/main/java/com/softwarebhayya/tmdb/service/RatingService.java
