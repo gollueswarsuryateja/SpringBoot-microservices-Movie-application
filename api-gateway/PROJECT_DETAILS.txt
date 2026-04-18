@@ -1,0 +1,143 @@
+================================================================================
+                        API GATEWAY - PROJECT DETAILS
+================================================================================
+Date: March 21, 2026
+
+--------------------------------------------------------------------------------
+1. PROJECT INFO
+--------------------------------------------------------------------------------
+  Group ID      : com.softwarebhayya.tmbd
+  Artifact ID   : api-gateway
+  Version       : 0.0.1-SNAPSHOT
+  Java Version  : 17
+  Spring Boot   : 4.0.4
+  Build Tool    : Maven
+
+--------------------------------------------------------------------------------
+2. DEPENDENCIES
+--------------------------------------------------------------------------------
+  Runtime:
+    - spring-boot-starter-webmvc       (REST API)
+    - spring-boot-starter-data-jpa     (ORM / Database)
+    - spring-boot-starter-actuator     (Health & Metrics)
+    - spring-boot-h2console            (H2 In-Memory DB Console)
+    - h2                               (In-Memory Database)
+    - mysql-connector-j                (MySQL Driver)
+    - lombok                           (Code Generation)
+
+  Test:
+    - spring-boot-starter-actuator-test
+    - spring-boot-starter-data-jpa-test
+    - spring-boot-starter-webmvc-test
+
+--------------------------------------------------------------------------------
+3. CONFIGURATION (application.properties)
+--------------------------------------------------------------------------------
+  movie-service.url  = http://localhost:8081/movies
+  rating-service.url = http://localhost:8082/ratings
+
+  NOTE: This service acts as an API Gateway — it proxies requests to:
+    - Movie Service  → http://localhost:8081
+    - Rating Service → http://localhost:8082
+
+--------------------------------------------------------------------------------
+4. APIs
+--------------------------------------------------------------------------------
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  ADMIN CONTROLLER  —  Base Path: /api/admin                            │
+  ├──────────┬──────────────────┬────────────────────────────────────────── ┤
+  │ Method   │ Endpoint         │ Description                               │
+  ├──────────┼──────────────────┼───────────────────────────────────────────┤
+  │ POST     │ /api/admin       │ Add a new movie                           │
+  │          │                  │ Body: Movie { id, name, director, actors }│
+  │          │                  │ Proxies to: movie-service.url             │
+  ├──────────┼──────────────────┼───────────────────────────────────────────┤
+  │ PUT      │ /api/admin/{id}  │ Update an existing movie by ID            │
+  │          │                  │ Body: Movie { id, name, director, actors }│
+  │          │                  │ Proxies to: movie-service.url/{id}        │
+  ├──────────┼──────────────────┼───────────────────────────────────────────┤
+  │ GET      │ /api/admin/{id}  │ Fetch movie + its rating by movie ID      │
+  │          │                  │ Returns: MovieRating { movie, rating }    │
+  │          │                  │ Proxies to: movie-service + rating-service│
+  └──────────┴──────────────────┴───────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  PUBLIC CONTROLLER  —  Base Path: /api/public                          │
+  ├──────────┬──────────────────┬───────────────────────────────────────────┤
+  │ Method   │ Endpoint         │ Description                               │
+  ├──────────┼──────────────────┼───────────────────────────────────────────┤
+  │ POST     │ /api/public      │ Submit a rating for a movie               │
+  │          │                  │ Body: RatingRequest { movieName, rating } │
+  │          │                  │ Proxies to: rating-service.url            │
+  └──────────┴──────────────────┴───────────────────────────────────────────┘
+
+--------------------------------------------------------------------------------
+5. MODELS
+--------------------------------------------------------------------------------
+
+  Movie
+  ─────
+    - id        : Long
+    - name      : String
+    - director  : String
+    - actors    : List<String>   (@ElementCollection)
+
+  Rating
+  ──────
+    - id        : Long
+    - avgRating : Double
+    - name      : String   (movie name)
+    - count     : int      (number of ratings)
+
+  RatingRequest
+  ─────────────
+    - movieName : String
+    - rating    : Double
+
+  MovieRating  (Composite response model)
+  ───────────
+    - movie     : Movie
+    - rating    : Rating
+
+--------------------------------------------------------------------------------
+6. DOWNSTREAM SERVICES
+--------------------------------------------------------------------------------
+
+  Movie Service
+    URL     : http://localhost:8081/movies
+    Used by : AdminController (POST, PUT, GET)
+
+  Rating Service
+    URL     : http://localhost:8082/ratings
+    Used by : AdminController (GET /{movieName})
+              publicController (POST)
+
+--------------------------------------------------------------------------------
+7. PROJECT STRUCTURE
+--------------------------------------------------------------------------------
+
+  api-gateway/
+  ├── pom.xml
+  ├── src/
+  │   ├── main/
+  │   │   ├── java/com/softwarebhayya/tmbd/
+  │   │   │   ├── ApiGatewayApplication.java
+  │   │   │   ├── controller/
+  │   │   │   │   ├── AdminController.java
+  │   │   │   │   └── publicController.java
+  │   │   │   └── model/
+  │   │   │       ├── Movie.java
+  │   │   │       ├── Rating.java
+  │   │   │       ├── RatingRequest.java
+  │   │   │       └── MovieRating.java
+  │   │   └── resources/
+  │   │       └── application.properties
+  │   └── test/
+  │       └── java/com/softwarebhayya/tmbd/
+  │           └── ApiGatewayApplicationTests.java
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+

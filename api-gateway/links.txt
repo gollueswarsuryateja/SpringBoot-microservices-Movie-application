@@ -1,0 +1,129 @@
+=====================================================================
+             API GATEWAY SERVICE - ALL LINKS & DETAILS
+=====================================================================
+
+----------------------------------------------------------------------
+ SERVICE URLS (configured in application.properties)
+----------------------------------------------------------------------
+
+API Gateway (This Service)  :  http://localhost:8080
+Movie Service               :  http://localhost:8081/movies
+Rating Service              :  http://localhost:8082/ratings
+
+----------------------------------------------------------------------
+ ADMIN APIs  →  /api/admin  (AdminController.java)
+----------------------------------------------------------------------
+
+1. ADD MOVIE
+   Method   : POST
+   URL      : http://localhost:8080/api/admin
+   Body     : {
+                  "name": "Inception",
+                  "description": "A mind-bending thriller",
+                  "releaseYear": 2010
+              }
+   Response : Saved Movie object (JSON)
+   Calls    : POST http://localhost:8081/movies
+
+----------------------------------------------------------------------
+
+2. UPDATE MOVIE
+   Method   : PUT
+   URL      : http://localhost:8080/api/admin/{id}
+   Example  : http://localhost:8080/api/admin/1
+   Body     : {
+                  "name": "Inception Updated",
+                  "description": "Updated description",
+                  "releaseYear": 2010
+              }
+   Response : 200 OK (no body)
+   Calls    : PUT http://localhost:8081/movies/{id}
+
+----------------------------------------------------------------------
+
+3. GET MOVIE + RATING (Combined)
+   Method   : GET
+   URL      : http://localhost:8080/api/admin/{id}
+   Example  : http://localhost:8080/api/admin/1
+   Body     : No body required
+   Response : {
+                  "movie": {
+                      "id": 1,
+                      "name": "Inception",
+                      ...
+                  },
+                  "rating": {
+                      "id": 1,
+                      "score": 8.5,
+                      "movieName": "Inception",
+                      "count": 100
+                  }
+              }
+   Calls    : GET http://localhost:8081/movies/{id}        ← Movie Service
+              GET http://localhost:8082/ratings/{movieName} ← Rating Service
+
+----------------------------------------------------------------------
+ PUBLIC APIs  →  /api/public  (publicController.java)
+----------------------------------------------------------------------
+
+4. ADD RATING
+   Method   : POST
+   URL      : http://localhost:8080/api/public
+   Body     : {
+                  "name": "Inception",
+                  "stars": 5.5
+              }
+   Response : Saved Rating object (JSON)
+   Calls    : POST http://localhost:8082/ratings
+
+----------------------------------------------------------------------
+ DOWNSTREAM SERVICE CALLS SUMMARY
+----------------------------------------------------------------------
+
+| Gateway Endpoint           | Calls                                  | Service        |
+|----------------------------|----------------------------------------|----------------|
+| POST /api/admin            | POST http://localhost:8081/movies      | Movie Service  |
+| PUT  /api/admin/{id}       | PUT  http://localhost:8081/movies/{id} | Movie Service  |
+| GET  /api/admin/{id}       | GET  http://localhost:8081/movies/{id} | Movie Service  |
+| GET  /api/admin/{id}       | GET  http://localhost:8082/ratings/{movieName} | Rating Service |
+| POST /api/public           | POST http://localhost:8082/ratings     | Rating Service |
+
+----------------------------------------------------------------------
+ MODELS (Data Objects)
+----------------------------------------------------------------------
+
+Movie        : id, name, description, releaseYear (etc.)
+Rating       : id, score, movieName, count
+RatingRequest: movieName, score
+MovieRating  : movie (Movie object) + rating (Rating object) → combined response
+
+----------------------------------------------------------------------
+ TECH STACK
+----------------------------------------------------------------------
+
+Framework   : Spring Boot
+Language    : Java
+HTTP Client : RestTemplate (to call Movie & Rating services)
+Logging     : Lombok @Slf4j
+Config      : application.properties
+
+----------------------------------------------------------------------
+ PROJECT STRUCTURE
+----------------------------------------------------------------------
+
+src/main/java/com/softwarebhayya/tmbd/
+  ├── ApiGatewayApplication.java          → Main entry point
+  ├── controller/
+  │   ├── AdminController.java            → Admin APIs (CRUD for movies + ratings fetch)
+  │   └── publicController.java           → Public APIs (Add rating)
+  └── model/
+      ├── Movie.java                      → Movie data object
+      ├── Rating.java                     → Rating data object
+      ├── RatingRequest.java              → Request body for adding rating
+      └── MovieRating.java               → Combined Movie + Rating response
+
+src/main/resources/
+  └── application.properties             → Service URLs configuration
+
+=====================================================================
+
