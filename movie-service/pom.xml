@@ -109,6 +109,15 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<image>
+						<name>docker.io/gest1901/${project.artifactId}:${project.version}</name>
+						<push>true</push>
+					</image>
+					<docker>
+						publishRegistryAuth>
+							<username>${env.DOCKERHUB_USER}</username>
+							<password>${env.DOCKERHUB_PWD}</password>
+					</docker>
 				</configuration>
 			</plugin>
 		</plugins>
